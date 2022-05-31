@@ -94,19 +94,6 @@ passport.deserializeUser((id,done)=>{
   });
 })
 
-/*
-const users=new UserData({
-    firstName: '',//Emmanuel
-    lastName: '',//Cobblah
-    address: '',//A59/19 Oblogo Rd, Dansoman
-    email: '',//darkocobby@gmail.com
-    password: '' //xas
-})
-
-
-users.save();
-
-**/
 app.get('/',(req,res)=>{
   console.log('Homepage')
     res.send('Homepage')
