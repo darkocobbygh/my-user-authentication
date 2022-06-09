@@ -101,14 +101,16 @@ function(accessToken, refreshToken, profile, cb) {
 
 //HOME ROUTE
 app.get('/',(req,res)=>{
-  console.log('Homepage')
+  console.log('Homepage');
+  // RENDER TO HOMEPAGE
     res.send('Homepage')
 });
 
 //REGISTER REQUESTS
 app.route('/register')
 .get((req,res)=>{
-  console.log('Register Page')
+  console.log('Register Page');
+  //RENDER TO REGISTER PAGE
   res.send('register')
 })
 .post((req, res)=>{
@@ -116,12 +118,14 @@ app.route('/register')
   UserData.register({username: req.body.username, firstName:req.body.firstName,lastName:req.body.lastName,email:req.body.email,country:req.body.country}, req.body.password,(err, user)=>{
     if (err) {
       console.log(err);
-      console.log('Not working')
+      console.log('Not working');
+      //RENDER TO REGISTER PAGE
       res.send("register");
     } else {
       passport.authenticate("local")(req, res,()=>{
-        console.log('Registered to a new sign up page')
-        res.send("Secrets Page");
+        console.log('Registered to a new sign up page');
+        //RENDER TO THE SECRETS PAGE
+        res.send("Secrets");
       });
     }
   });
@@ -137,13 +141,13 @@ app.get('/auth/facebook/mai',
   function(req, res) {
     // Successful authentication, redirect home.
     console.log('Secrets')
-    res.send('Secrets Page');
+    res.render('mai');
   });
 
 // Login Requests
 app.route('/login')
 .get((req,res)=>{
-  res.send('Login Page')
+  res.render('login')
 })
 .post((req, res)=>{
 
