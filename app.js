@@ -6,6 +6,7 @@ const mongoose=require('mongoose');
 const session=require('express-session');
 const passport=require('passport');
 const passportLocalMongoose=require('passport-local-mongoose');
+const FacebookStrategy= require('passport-facebook').Strategy;
 const findOrCreate=require('mongoose-findorcreate');
 
 //Create a variable for the Express App
@@ -28,21 +29,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-/* FACEBOOK LOGIN STRATEGY
-passport.use(new FacebookStrategy({
-    clientID: process.env.CLIENTID,
-    clientSecret: process.env.CLIENTSECRET,
-    callbackURL: "http://localhost:3000/auth/facebook/callback",
-    userProfileUrl:''
-  },
-  function(accessToken, refreshToken, profile, cb) {
-      console.log(profile);
-    User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-      return cb(err, user);
-    });
-  }
-));
-**/
+
 
 //Create a variable for the Database URL
 const dbURI= 'mongodb://0.0.0.0:27017/usersDB';
@@ -69,6 +56,9 @@ const userDataSchema=new mongoose.Schema({
     },
     password:{
         type:String
+    },
+    facebookId:{
+      type:String
     }
 });
 
@@ -92,8 +82,24 @@ passport.deserializeUser((id,done)=>{
   UserData.findById(id,(err,user)=>{
     done(err,user);
   });
-})
+});
 
+//FACEBOOK LOGIN STRATEGY
+passport.use(new FacebookStrategy({
+  clientID: process.env.CLIENT_ID_FB,
+  clientSecret: process.env.CLIENT_SECRET_FB,
+  callbackURL: "http://localhost:3000/auth/facebook/mai",
+  userProfileUrl:''
+},
+function(accessToken, refreshToken, profile, cb) {
+    console.log(profile);
+  User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+    return cb(err, user);
+  });
+}
+));
+
+//HOME ROUTE
 app.get('/',(req,res)=>{
   console.log('Homepage')
     res.send('Homepage')
@@ -103,7 +109,7 @@ app.get('/',(req,res)=>{
 app.route('/register')
 .get((req,res)=>{
   console.log('Register Page')
-  res.send('Register Page')
+  res.send('register')
 })
 .post((req, res)=>{
 
@@ -111,31 +117,28 @@ app.route('/register')
     if (err) {
       console.log(err);
       console.log('Not working')
-      res.redirect("register");
+      res.send("register");
     } else {
       passport.authenticate("local")(req, res,()=>{
         console.log('Registered to a new sign up page')
-        res.send("secrets");
+        res.send("Secrets Page");
       });
     }
   });
 
 });
 
-//Secrets Routes
-/*
-app.get("/secrets", function(req, res){
-  User.find({"secret": {$ne: null}}, function(err, foundUsers){
-    if (err){
-      console.log(err);
-    } else {
-      if (foundUsers) {
-        res.render("secrets", {usersWithSecrets: foundUsers});
-      }
-    }
+//FACEBOOK ROUTES
+app.get('/auth/facebook',
+  passport.authenticate('facebook'));
+
+app.get('/auth/facebook/mai',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    console.log('Secrets')
+    res.send('Secrets Page');
   });
-});
-**/
 
 // Login Requests
 app.route('/login')
@@ -163,17 +166,6 @@ app.route('/login')
 
 });
 
-/*
-app.get('/auth/facebook',
-  passport.authenticate('facebook'));
-
-app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    res.redirect('/');
-  });
-  **/
 
 
 app.listen(process.env.PORT|| 3000,()=>{
